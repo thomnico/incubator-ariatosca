@@ -165,7 +165,7 @@ class ModelStorage(Storage):
         Drop all the tables from the model.
         :return:
         """
-        for mapi in self.registered.values():
+        for mapi in self.registered.itervalues():
             mapi.drop()
 
     @contextmanager

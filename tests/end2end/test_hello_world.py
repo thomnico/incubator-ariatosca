@@ -56,5 +56,5 @@ def _verify_deployed_service_in_storage(service_name, model_storage):
     assert service.name == service_name
     assert len(service.executions) == 1
     assert len(service.nodes) == 2
-    assert all(node.state == node.STARTED for node in service.nodes.values())
+    assert all(node.state == node.STARTED for node in service.nodes.itervalues())
     assert len(service.executions[0].logs) > 0

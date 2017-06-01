@@ -53,8 +53,8 @@ class ExecutionBase(ModelMixin):
 
     __tablename__ = 'execution'
 
-    __private_fields__ = ['service_fk',
-                          'service_template']
+    __private_fields__ = ('service_fk',
+                          'service_template')
 
     SUCCEEDED = 'succeeded'
     FAILED = 'failed'
@@ -257,10 +257,10 @@ class TaskBase(ModelMixin):
 
     __tablename__ = 'task'
 
-    __private_fields__ = ['node_fk',
+    __private_fields__ = ('node_fk',
                           'relationship_fk',
                           'plugin_fk',
-                          'execution_fk']
+                          'execution_fk')
 
     PENDING = 'pending'
     RETRYING = 'retrying'
@@ -397,8 +397,8 @@ class LogBase(ModelMixin):
 
     __tablename__ = 'log'
 
-    __private_fields__ = ['execution_fk',
-                          'task_fk']
+    __private_fields__ = ('execution_fk',
+                          'task_fk')
 
     @declared_attr
     def execution(cls):

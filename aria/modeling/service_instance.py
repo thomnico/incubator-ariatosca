@@ -88,8 +88,8 @@ class ServiceBase(InstanceModelMixin):
 
     __tablename__ = 'service'
 
-    __private_fields__ = ['substitution_fk',
-                          'service_template_fk']
+    __private_fields__ = ('substitution_fk',
+                          'service_template_fk')
 
     # region foreign keys
 
@@ -357,10 +357,10 @@ class NodeBase(InstanceModelMixin):
 
     __tablename__ = 'node'
 
-    __private_fields__ = ['type_fk',
+    __private_fields__ = ('type_fk',
                           'host_fk',
                           'service_fk',
-                          'node_template_fk']
+                          'node_template_fk')
 
     INITIAL = 'initial'
     CREATING = 'creating'
@@ -371,16 +371,17 @@ class NodeBase(InstanceModelMixin):
     STARTED = 'started'
     STOPPING = 'stopping'
     DELETING = 'deleting'
-    # 'deleted' isn't actually part of the tosca spec, since according the description of the
-    # 'deleting' state: "Node is transitioning from its current state to one where it is deleted and
-    #  its state is no longer tracked by the instance model."
-    # However, we prefer to be able to retrieve information about deleted nodes, so we chose to add
-    # this 'deleted' state to enable us to do so.
     DELETED = 'deleted'
     ERROR = 'error'
 
-    STATES = [INITIAL, CREATING, CREATED, CONFIGURING, CONFIGURED, STARTING, STARTED, STOPPING,
-              DELETING, DELETED, ERROR]
+    # Note: 'deleted' isn't actually part of the TOSCA spec, since according the description of the
+    # 'deleting' state: "Node is transitioning from its current state to one where it is deleted and
+    # its state is no longer tracked by the instance model." However, we prefer to be able to
+    # retrieve information about deleted nodes, so we chose to add this 'deleted' state to enable us
+    # to do so.
+
+    STATES = (INITIAL, CREATING, CREATED, CONFIGURING, CONFIGURED, STARTING, STARTED, STOPPING,
+              DELETING, DELETED, ERROR)
 
     _op_to_state = {'create': {'transitional': CREATING, 'finished': CREATED},
                     'configure': {'transitional': CONFIGURING, 'finished': CONFIGURED},
@@ -722,7 +723,9 @@ class GroupBase(InstanceModelMixin):
 
     __tablename__ = 'group'
 
-    __private_fields__ = ['type_fk', 'service_fk', 'group_template_fk']
+    __private_fields__ = ('type_fk',
+                          'service_fk',
+                          'group_template_fk')
 
     # region foreign_keys
 
@@ -846,7 +849,9 @@ class PolicyBase(InstanceModelMixin):
 
     __tablename__ = 'policy'
 
-    __private_fields__ = ['type_fk', 'service_fk', 'policy_template_fk']
+    __private_fields__ = ('type_fk',
+                          'service_fk',
+                          'policy_template_fk')
 
     # region foreign_keys
 
@@ -962,8 +967,8 @@ class SubstitutionBase(InstanceModelMixin):
 
     __tablename__ = 'substitution'
 
-    __private_fields__ = ['node_type_fk',
-                          'substitution_template_fk']
+    __private_fields__ = ('node_type_fk',
+                          'substitution_template_fk')
 
     # region foreign_keys
 
@@ -1053,10 +1058,10 @@ class SubstitutionMappingBase(InstanceModelMixin):
 
     __tablename__ = 'substitution_mapping'
 
-    __private_fields__ = ['substitution_fk',
+    __private_fields__ = ('substitution_fk',
                           'node_fk',
                           'capability_fk',
-                          'requirement_template_fk']
+                          'requirement_template_fk')
 
     # region foreign keys
 
@@ -1176,14 +1181,14 @@ class RelationshipBase(InstanceModelMixin):
 
     __tablename__ = 'relationship'
 
-    __private_fields__ = ['type_fk',
+    __private_fields__ = ('type_fk',
                           'source_node_fk',
                           'target_node_fk',
                           'target_capability_fk',
                           'requirement_template_fk',
                           'relationship_template_fk',
                           'target_position',
-                          'source_position']
+                          'source_position')
 
     # region foreign keys
 
@@ -1360,9 +1365,9 @@ class CapabilityBase(InstanceModelMixin):
 
     __tablename__ = 'capability'
 
-    __private_fields__ = ['capability_fk',
+    __private_fields__ = ('capability_fk',
                           'node_fk',
-                          'capability_template_fk']
+                          'capability_template_fk')
 
     # region foreign_keys
 
@@ -1487,11 +1492,11 @@ class InterfaceBase(InstanceModelMixin):
 
     __tablename__ = 'interface'
 
-    __private_fields__ = ['type_fk',
+    __private_fields__ = ('type_fk',
                           'node_fk',
                           'group_fk',
                           'relationship_fk',
-                          'interface_template_fk']
+                          'interface_template_fk')
 
     # region foreign_keys
 
@@ -1644,10 +1649,10 @@ class OperationBase(InstanceModelMixin):
 
     __tablename__ = 'operation'
 
-    __private_fields__ = ['service_fk',
+    __private_fields__ = ('service_fk',
                           'interface_fk',
                           'plugin_fk',
-                          'operation_template_fk']
+                          'operation_template_fk')
 
     # region foreign_keys
 
@@ -1849,9 +1854,9 @@ class ArtifactBase(InstanceModelMixin):
 
     __tablename__ = 'artifact'
 
-    __private_fields__ = ['type_fk',
+    __private_fields__ = ('type_fk',
                           'node_fk',
-                          'artifact_template_fk']
+                          'artifact_template_fk')
 
     # region foreign_keys
 

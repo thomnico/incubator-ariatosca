@@ -58,4 +58,27 @@ policy_types:
           the full path to a Python @workflow function that generates a task graph based on the
           service topology.
         type: string
-        required: true
+
+  aria.Scaling:
+    _extensions:
+      type_qualified_name: aria:Scaling
+      role: scaling
+    description: >-
+      Scaling.
+    derived_from: tosca.policies.Scaling
+    properties:
+      default_instances:
+        type: integer
+        default: 1
+        constraints:
+          - greater_or_equal: 0
+      min_instances:
+        type: integer
+        default: 0
+        constraints:
+          - greater_or_equal: 0
+      max_instances:
+        type: integer
+        default: -1
+        constraints:
+          - greater_or_equal: -1

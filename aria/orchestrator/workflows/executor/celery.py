@@ -44,7 +44,7 @@ class CeleryExecutor(BaseExecutor):
 
     def _execute(self, task):
         self._tasks[task.id] = task
-        arguments = dict(arg.unwrapped for arg in task.arguments.values())
+        arguments = dict(arg.unwrapped for arg in task.arguments.itervalues())
         arguments['ctx'] = task.context
         self._results[task.id] = self._app.send_task(
             task.operation_mapping,

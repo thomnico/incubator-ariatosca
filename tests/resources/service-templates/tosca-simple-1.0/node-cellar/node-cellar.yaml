@@ -273,6 +273,7 @@ topology_template:
       type: openstack.Scaling
       properties:
         bandwidth_threshold: 2 GB
+        default_instances: 2
       targets: # node templates or groups
         - node_cellar_group
     

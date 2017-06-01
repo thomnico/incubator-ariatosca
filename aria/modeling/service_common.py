@@ -308,7 +308,7 @@ class TypeBase(InstanceModelMixin):
 
     __tablename__ = 'type'
 
-    __private_fields__ = ['parent_type_fk']
+    __private_fields__ = ('parent_type_fk',)
 
     variant = Column(Text, nullable=False)
     description = Column(Text)

@@ -98,14 +98,14 @@ class ServiceTemplateBase(TemplateModelMixin):
 
     __tablename__ = 'service_template'
 
-    __private_fields__ = ['substitution_template_fk',
+    __private_fields__ = ('substitution_template_fk',
                           'node_type_fk',
                           'group_type_fk',
                           'policy_type_fk',
                           'relationship_type_fk',
                           'capability_type_fk',
                           'interface_type_fk',
-                          'artifact_type_fk']
+                          'artifact_type_fk')
 
     description = Column(Text)
     main_file_name = Column(Text)
@@ -279,12 +279,14 @@ class ServiceTemplateBase(TemplateModelMixin):
 
     def instantiate(self, container, model_storage, inputs=None):  # pylint: disable=arguments-differ
         from . import models
-        context = ConsumptionContext.get_thread_local()
         now = datetime.now()
         service = models.Service(created_at=now,
                                  updated_at=now,
                                  description=deepcopy_with_locators(self.description),
                                  service_template=self)
+
+        # TODO: we want to remove this use of the context
+        context = ConsumptionContext.get_thread_local()
         context.modeling.instance = service
 
         service.inputs = utils.merge_parameter_values(inputs, self.inputs, model_cls=models.Input)
@@ -438,8 +440,8 @@ class NodeTemplateBase(TemplateModelMixin):
 
     __tablename__ = 'node_template'
 
-    __private_fields__ = ['type_fk',
-                          'service_template_fk']
+    __private_fields__ = ('type_fk',
+                          'service_template_fk')
 
     # region foreign_keys
 
@@ -518,17 +520,7 @@ class NodeTemplateBase(TemplateModelMixin):
     # endregion
 
     description = Column(Text)
-    default_instances = Column(Integer, default=1)
-    min_instances = Column(Integer, default=0)
-    max_instances = Column(Integer, default=None)
     target_node_template_constraints = Column(PickleType)
-
-    def is_target_node_template_valid(self, target_node_template):
-        if self.target_node_template_constraints:
-            for node_template_constraint in self.target_node_template_constraints:
-                if not node_template_constraint.matches(self, target_node_template):
-                    return False
-        return True
 
     @property
     def as_raw(self):
@@ -536,9 +528,6 @@ class NodeTemplateBase(TemplateModelMixin):
             ('name', self.name),
             ('description', self.description),
             ('type_name', self.type.name),
-            ('default_instances', self.default_instances),
-            ('min_instances', self.min_instances),
-            ('max_instances', self.max_instances),
             ('properties', formatting.as_raw_dict(self.properties)),
             ('attributes', formatting.as_raw_dict(self.properties)),
             ('interface_templates', formatting.as_raw_list(self.interface_templates)),
@@ -548,13 +537,7 @@ class NodeTemplateBase(TemplateModelMixin):
 
     def instantiate(self, container):
         from . import models
-        if self.nodes:
-            highest_name_suffix = max(int(n.name.rsplit('_', 1)[-1]) for n in self.nodes)
-            suffix = highest_name_suffix + 1
-        else:
-            suffix = 1
-        name = '{name}_{index}'.format(name=self.name, index=suffix)
-        node = models.Node(name=name,
+        node = models.Node(name=self.next_name,
                            type=self.type,
                            description=deepcopy_with_locators(self.description),
                            state=models.Node.INITIAL,
@@ -566,10 +549,12 @@ class NodeTemplateBase(TemplateModelMixin):
         utils.instantiate_dict(node, node.capabilities, self.capability_templates)
 
         # Default attributes
-        if 'tosca_name' in node.attributes:
+        if ('tosca_name' in node.attributes) \
+            and (node.attributes['tosca_name'].type_name == 'string'):
             node.attributes['tosca_name'].value = self.name
-        if 'tosca_id' in node.attributes:
-            node.attributes['tosca_id'].value = name
+        if 'tosca_id' in node.attributes \
+            and (node.attributes['tosca_id'].type_name == 'string'):
+            node.attributes['tosca_id'].value = node.name
 
         return node
 
@@ -609,6 +594,56 @@ class NodeTemplateBase(TemplateModelMixin):
             utils.dump_dict_values(self.capability_templates, 'Capability templates')
             utils.dump_list_values(self.requirement_templates, 'Requirement templates')
 
+    @property
+    def next_index(self):
+        """
+        Next available node index.
+
+        :returns: node index
+        :rtype: int
+        """
+
+        max_index = 0
+        if self.nodes:
+            max_index = max(int(n.name.rsplit('_', 1)[-1]) for n in self.nodes)
+        return max_index + 1
+
+    @property
+    def next_name(self):
+        """
+        Next available node name.
+
+        :returns: node name
+        :rtype: basestring
+        """
+
+        return '{name}_{index}'.format(name=self.name, index=self.next_index)
+
+    @property
+    def default_instances(self):
+        # TODO: currently finds the first matching policy; but we should emit a validation error
+        # if more than one policy applies to the same node
+        for policy_template in self.service_template.policy_templates.itervalues():
+            if policy_template.type.role == 'scaling':
+                if policy_template.is_for_node_template(self.name):
+                    default_instances = policy_template.properties.get('default_instances')
+                    if (default_instances is not None) \
+                        and (default_instances.type_name == 'integer'):
+                        return default_instances.value
+                    break
+        return 1
+
+    def is_target_node_template_valid(self, target_node_template):
+        """
+        Checks if ``target_node_template`` matches all our ``target_node_template_constraints``.
+        """
+
+        if self.target_node_template_constraints:
+            for node_template_constraint in self.target_node_template_constraints:
+                if not node_template_constraint.matches(self, target_node_template):
+                    return False
+        return True
+
 
 class GroupTemplateBase(TemplateModelMixin):
     """
@@ -638,8 +673,8 @@ class GroupTemplateBase(TemplateModelMixin):
 
     __tablename__ = 'group_template'
 
-    __private_fields__ = ['type_fk',
-                          'service_template_fk']
+    __private_fields__ = ('type_fk',
+                          'service_template_fk')
 
     # region foreign keys
 
@@ -744,6 +779,12 @@ class GroupTemplateBase(TemplateModelMixin):
                 console.puts('Member node templates: {0}'.format(', '.join(
                     (str(context.style.node(v.name)) for v in self.node_templates))))
 
+    def contains_node_template(self, name):
+        for node_template in self.node_templates:
+            if node_template.name == name:
+                return True
+        return False
+
 
 class PolicyTemplateBase(TemplateModelMixin):
     """
@@ -770,7 +811,8 @@ class PolicyTemplateBase(TemplateModelMixin):
 
     __tablename__ = 'policy_template'
 
-    __private_fields__ = ['type_fk', 'service_template_fk']
+    __private_fields__ = ('type_fk',
+                          'service_template_fk')
 
     # region foreign keys
 
@@ -876,6 +918,21 @@ class PolicyTemplateBase(TemplateModelMixin):
                 console.puts('Target group templates: {0}'.format(', '.join(
                     (str(context.style.node(v.name)) for v in self.group_templates))))
 
+    def is_for_node_template(self, name):
+        for node_template in self.node_templates:
+            if node_template.name == name:
+                return True
+        for group_template in self.group_templates:
+            if group_template.contains_node_template(name):
+                return True
+        return False
+
+    def is_for_group_template(self, name):
+        for group_template in self.group_templates:
+            if group_template.name == name:
+                return True
+        return False
+
 
 class SubstitutionTemplateBase(TemplateModelMixin):
     """
@@ -893,7 +950,7 @@ class SubstitutionTemplateBase(TemplateModelMixin):
 
     __tablename__ = 'substitution_template'
 
-    __private_fields__ = ['node_type_fk']
+    __private_fields__ = ('node_type_fk',)
 
     # region foreign keys
 
@@ -979,10 +1036,10 @@ class SubstitutionTemplateMappingBase(TemplateModelMixin):
 
     __tablename__ = 'substitution_template_mapping'
 
-    __private_fields__ = ['substitution_template_fk',
+    __private_fields__ = ('substitution_template_fk',
                           'node_template_fk',
                           'capability_template_fk',
-                          'requirement_template_fk']
+                          'requirement_template_fk')
 
     # region foreign keys
 
@@ -1125,11 +1182,11 @@ class RequirementTemplateBase(TemplateModelMixin):
 
     __tablename__ = 'requirement_template'
 
-    __private_fields__ = ['target_node_type_fk',
+    __private_fields__ = ('target_node_type_fk',
                           'target_node_template_fk',
                           'target_capability_type_fk'
                           'node_template_fk',
-                          'relationship_template_fk']
+                          'relationship_template_fk')
 
     # region foreign keys
 
@@ -1236,7 +1293,7 @@ class RequirementTemplateBase(TemplateModelMixin):
         # Find first node that matches the type
         elif self.target_node_type is not None:
             for target_node_template in \
-                    self.node_template.service_template.node_templates.values():
+                    self.node_template.service_template.node_templates.itervalues():
                 if self.target_node_type.get_descendant(target_node_template.type.name) is None:
                     continue
 
@@ -1338,7 +1395,7 @@ class RelationshipTemplateBase(TemplateModelMixin):
 
     __tablename__ = 'relationship_template'
 
-    __private_fields__ = ['type_fk']
+    __private_fields__ = ('type_fk',)
 
     # region foreign keys
 
@@ -1453,8 +1510,8 @@ class CapabilityTemplateBase(TemplateModelMixin):
 
     __tablename__ = 'capability_template'
 
-    __private_fields__ = ['type_fk',
-                          'node_template_fk']
+    __private_fields__ = ('type_fk',
+                          'node_template_fk')
 
     # region foreign keys
 
@@ -1612,10 +1669,10 @@ class InterfaceTemplateBase(TemplateModelMixin):
 
     __tablename__ = 'interface_template'
 
-    __private_fields__ = ['type_fk',
+    __private_fields__ = ('type_fk',
                           'node_template_fk',
                           'group_template_fk',
-                          'relationship_template_fk']
+                          'relationship_template_fk')
 
     # region foreign keys
 
@@ -1768,9 +1825,9 @@ class OperationTemplateBase(TemplateModelMixin):
 
     __tablename__ = 'operation_template'
 
-    __private_fields__ = ['service_template_fk',
+    __private_fields__ = ('service_template_fk',
                           'interface_template_fk',
-                          'plugin_fk']
+                          'plugin_fk')
 
     # region foreign keys
 
@@ -1943,8 +2000,8 @@ class ArtifactTemplateBase(TemplateModelMixin):
 
     __tablename__ = 'artifact_template'
 
-    __private_fields__ = ['type_fk',
-                          'node_template_fk']
+    __private_fields__ = ('type_fk',
+                          'node_template_fk')
 
     # region foreign keys
 
@@ -2064,8 +2121,8 @@ class PluginSpecificationBase(TemplateModelMixin):
 
     __tablename__ = 'plugin_specification'
 
-    __private_fields__ = ['service_template_fk',
-                          'plugin_fk']
+    __private_fields__ = ('service_template_fk',
+                          'plugin_fk')
 
     version = Column(Text)
     enabled = Column(Boolean, nullable=False, default=True)
