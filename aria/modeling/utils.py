@@ -201,6 +201,10 @@ def dump_interfaces(interfaces, name='Interfaces'):
             interface.dump()
 
 
+def dict_as_arguments(the_dict):
+    return OrderedDict((name, value.as_argument()) for name, value in the_dict.iteritems())
+
+
 class classproperty(object):                                                                        # pylint: disable=invalid-name
     def __init__(self, f):
         self._func = f

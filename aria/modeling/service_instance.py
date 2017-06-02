@@ -1742,19 +1742,19 @@ class OperationBase(InstanceModelMixin):
             # In the future plugins may be able to add their own "configure_operation" hook that
             # can validate the configuration and otherwise create specially derived arguments. For
             # now, we just send all configuration parameters as arguments without validation.
-            configurations_as_arguments = {}
-            for configuration in self.configurations.itervalues():
-                configurations_as_arguments[configuration.name] = configuration.as_argument()
+            utils.instantiate_dict(self, self.arguments,
+                                   utils.dict_as_arguments(self.configurations))
 
-            utils.instantiate_dict(self, self.arguments, configurations_as_arguments)
+        if self.interface is not None:
+            # Send all interface inputs as extra arguments
+            # ("interface" is None for workflow operations)
+            # Note that they will override existing arguments of the same names
+            utils.instantiate_dict(self, self.arguments,
+                                   utils.dict_as_arguments(self.interface.inputs))
 
         # Send all inputs as extra arguments
         # Note that they will override existing arguments of the same names
-        inputs_as_arguments = {}
-        for input in self.inputs.itervalues():
-            inputs_as_arguments[input.name] = input.as_argument()
-
-        utils.instantiate_dict(self, self.arguments, inputs_as_arguments)
+        utils.instantiate_dict(self, self.arguments, utils.dict_as_arguments(self.inputs))
 
         # Check for reserved arguments
         from ..orchestrator.decorators import OPERATION_DECORATOR_RESERVED_ARGUMENTS
