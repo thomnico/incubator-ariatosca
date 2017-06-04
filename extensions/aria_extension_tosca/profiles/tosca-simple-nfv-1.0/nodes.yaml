@@ -17,7 +17,7 @@ node_types:
 
   tosca.nodes.nfv.VNF:
     _extensions:
-      shorthand_name: VNF # ARIA NOTE: ommitted in the spec
+      shorthand_name: VNF # ARIA NOTE: omitted in the spec
       type_qualified_name: tosca:VNF
       specification: tosca-simple-nfv-1.0
       specification_section: 8.5.1
@@ -45,23 +45,23 @@ node_types:
           capability: tosca.capabilities.nfv.VirtualLinkable
           relationship: tosca.relationships.nfv.VirtualLinksTo
 
-  tosca.nodes.nfv.VDU:
-    _extensions:
-      shorthand_name: VDU
-      type_qualified_name: tosca:VDU
-      specification: tosca-simple-nfv-1.0
-      specification_section: 8.5.2
-      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd03/tosca-nfv-v1.0-csd03.html#_Toc419290242'
-    description: >-
-      The NFV vdu node type represents a logical vdu entity as defined by [ETSI GS NFV-MAN 001 v1.1.1].
-    derived_from: tosca.nodes.Root
-    capabilities:
-      nfv_compute:
-        type: tosca.capabilities.Compute.Container.Architecture
-      virtual_binding:
-        type: tosca.capabilities.nfv.VirtualBindable
-      monitoring_parameter:
-        type: tosca.capabilities.nfv.Metric
+#  tosca.nodes.nfv.VDU:
+#    _extensions:
+#      shorthand_name: VDU
+#      type_qualified_name: tosca:VDU
+#      specification: tosca-simple-nfv-1.0
+#      specification_section: 8.5.2
+#      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd03/tosca-nfv-v1.0-csd03.html#_Toc419290242'
+#    description: >-
+#      The NFV vdu node type represents a logical vdu entity as defined by [ETSI GS NFV-MAN 001 v1.1.1].
+#    derived_from: tosca.nodes.Root
+#    capabilities:
+#      nfv_compute:
+#        type: tosca.capabilities.Compute.Container.Architecture
+#      virtual_binding:
+#        type: tosca.capabilities.nfv.VirtualBindable
+#      monitoring_parameter:
+#        type: tosca.capabilities.nfv.Metric
 
   tosca.nodes.nfv.CP:
     _extensions:
@@ -82,7 +82,7 @@ node_types:
           This may be, for example, a virtual port, a virtual NIC address, a SR-IOV port, a physical port, a physical NIC address
           or the endpoint of an IP VPN enabling network connectivity.
         type: string
-      anti_spoof_protection:
+      anti_spoofing_protection:
         description: >-
           Indicates of whether anti-spoofing rule need to be enabled for this vNIC. This is applicable only when CP type is virtual
           NIC (vPort).
@@ -147,7 +147,7 @@ node_types:
 
   tosca.nodes.nfv.VL.ELine:
     _extensions:
-      shorthand_name: VL.ELine # ARIA NOTE: ommitted in the spec
+      shorthand_name: VL.ELine # ARIA NOTE: omitted in the spec
       type_qualified_name: tosca:VL.ELine
       specification: tosca-simple-nfv-1.0
       specification_section: 9.2
@@ -158,11 +158,13 @@ node_types:
     capabilities:
       virtual_linkable:
         type: tosca.capabilities.nfv.VirtualLinkable
-        occurrences: [ 2, UNBOUNDED ] # ARIA NOTE: the spec is wrong here, must be a range
+        occurrences: [ 2, 2 ] # ARIA NOTE: section 3.2.3.1 states that the upper bound must be
+                              # higher than the lower bound, but section 3.6.2.1 uses a range with
+                              # equal bounds
 
   tosca.nodes.nfv.VL.ELAN:
     _extensions:
-      shorthand_name: VL.ELAN # ARIA NOTE: ommitted in the spec
+      shorthand_name: VL.ELAN # ARIA NOTE: omitted in the spec
       type_qualified_name: tosca:VL.ELAN
       specification: tosca-simple-nfv-1.0
       specification_section: 9.3
@@ -173,7 +175,7 @@ node_types:
 
   tosca.nodes.nfv.VL.ETree:
     _extensions:
-      shorthand_name: VL.ETree # ARIA NOTE: ommitted in the spec
+      shorthand_name: VL.ETree # ARIA NOTE: omitted in the spec
       type_qualified_name: tosca:VL.ETree
       specification: tosca-simple-nfv-1.0
       specification_section: 9.4
