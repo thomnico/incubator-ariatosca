@@ -99,7 +99,7 @@ data_types:
           instantiated from the parent Connection Point Descriptor.
         type: tosca.datatypes.nfv.L3AddressData
         required: false
-        # ARIA NOTE: states under the "constraints" column in the properties table:
+        # ARIA NOTE: the spec states under the "constraints" column in the properties table:
         # "Shall be present when the addressType is ip_address."
 
   tosca.datatypes.nfv.VirtualNetworkInterfaceRequirements:
