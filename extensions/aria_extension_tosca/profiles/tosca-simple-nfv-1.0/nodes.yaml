@@ -42,7 +42,7 @@ node_types:
           The Value references a descriptor from which a valid boot device is created e.g.
           VirtualStorageDescriptor from which a VirtualStorage instance is created. If no boot order
           is defined the default boot order defined in the VIM or NFVI shall be used.
-        type: type: # explicit index (boot index) not necessary, contrary to IFA011
+        type: list # explicit index (boot index) not necessary, contrary to IFA011
           entry_schema:
             type: string
         required: false
