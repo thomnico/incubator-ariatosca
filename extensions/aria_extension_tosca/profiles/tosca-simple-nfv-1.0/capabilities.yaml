@@ -15,51 +15,6 @@
 
 capability_types:
 
-  tosca.capabilities.Compute.Container.Architecture:
-    _extensions:
-      shorthand_name: Compute.Container.Architecture
-      type_qualified_name: tosca:Compute.Container.Architecture
-      specification: tosca-simple-nfv-1.0
-      specification_section: 8.2.1
-      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd03/tosca-nfv-v1.0-csd03.html#DEFN_TYPE_CAPABILITIES_CONTAINER'
-    description: >-
-      Enhance compute architecture capability that needs to be typically use for performance sensitive NFV workloads.
-    derived_from: tosca.capabilities.Container
-    properties:
-      mem_page_size:
-        description: >-
-          Describe page size of the VM:
-  
-          * small page size is typically 4KB
-          * large page size is typically 2MB
-          * any page size maps to system default
-          * custom MB value: sets TLB size to this specific value
-        type: string
-        # ARIA NOTE: seems wrong in the spec
-        #constraints:
-        #  - [ normal, huge ]
-      cpu_allocation:
-        description: >-
-          Describes CPU allocation requirements like dedicated CPUs (cpu pinning), socket count, thread count, etc.
-        type: tosca.datatypes.compute.Container.Architecture.CPUAllocation
-        required: false
-      numa_node_count:
-        description: >-
-          Specifies the symmetric count of NUMA nodes to expose to the VM. vCPU and Memory equally split across this number of
-          NUMA.
-  
-          NOTE: the map of numa_nodes should not be specified.
-        type: integer
-        required: false 
-      numa_nodes:
-        description: >-
-          Asymmetric allocation of vCPU and Memory across the specific NUMA nodes (CPU sockets and memory banks).
-  
-          NOTE: symmetric numa_node_count should not be specified.
-        type: map
-        entry_schema: tosca.datatypes.compute.Container.Architecture.NUMA
-        required: false
-
   tosca.capabilities.nfv.VirtualBindable:
     _extensions:
       shorthand_name: VirtualBindable

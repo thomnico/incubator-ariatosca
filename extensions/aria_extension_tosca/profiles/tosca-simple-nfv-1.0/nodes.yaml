@@ -15,36 +15,6 @@
 
 node_types:
 
-  tosca.nodes.nfv.VNF:
-    _extensions:
-      shorthand_name: VNF # ARIA NOTE: omitted in the spec
-      type_qualified_name: tosca:VNF
-      specification: tosca-simple-nfv-1.0
-      specification_section: 8.5.1
-      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd03/tosca-nfv-v1.0-csd03.html#_Toc379455076'
-    description: >-
-      The NFV VNF Node Type represents a Virtual Network Function as defined by [ETSI GS NFV-MAN 001 v1.1.1]. It is the default
-      type that all other VNF Node Types derive from. This allows for all VNF nodes to have a consistent set of features for
-      modeling and management (e.g., consistent definitions for requirements, capabilities and lifecycle interfaces).
-    derived_from: tosca.nodes.Root
-    properties:
-      id:
-        description: >-
-          ID of this VNF.
-        type: string
-      vendor:
-        description: >-
-          Name of the vendor who generate this VNF.
-        type: string
-      version:
-        description: >-
-          Version of the software for this VNF.
-        type: string
-    requirements:
-      - virtual_link:
-          capability: tosca.capabilities.nfv.VirtualLinkable
-          relationship: tosca.relationships.nfv.VirtualLinksTo
-
   tosca.nodes.nfv.Cpd:
     _extensions:
       shorthand_name: Cpd
@@ -123,7 +93,11 @@ node_types:
           description: Describe the requirement for binding with VDU
           capability: tosca.capabilities.nfv.VirtualBindable
           relationship: tosca.relationships.nfv.VirtualBindsTo
-          node: tosca.nodes.nfv.VDU
+          node: tosca.nodes.nfv.VDU.Compute
+          # ARIA NOTE: the spec states "node: tosca.nodes.nfv.VDU", but this is probably a mistake
+          # as tosca.nodes.nfv.VDU was removed, and replaced with tosca.nodes.nfv.VDU.Compute and
+          # tosca.nodes.nfv.VDU.VirtualStorage. I choose to use tosca.nodes.nfv.VDU.Compute, but it
+          # can be changed upon discussion.
 
   VnfVirtualLinkDesc:
     _extensions:
@@ -173,62 +147,6 @@ node_types:
       # monitoring_parameters:
         # modeled as ad hoc (named) capabilities in node template
 
-#  tosca.nodes.nfv.VDU:
-#    _extensions:
-#      shorthand_name: VDU
-#      type_qualified_name: tosca:VDU
-#      specification: tosca-simple-nfv-1.0
-#      specification_section: 8.5.2
-#      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd03/tosca-nfv-v1.0-csd03.html#_Toc419290242'
-#    description: >-
-#      The NFV vdu node type represents a logical vdu entity as defined by [ETSI GS NFV-MAN 001 v1.1.1].
-#    derived_from: tosca.nodes.Root
-#    capabilities:
-#      nfv_compute:
-#        type: tosca.capabilities.Compute.Container.Architecture
-#      virtual_binding:
-#        type: tosca.capabilities.nfv.VirtualBindable
-#      monitoring_parameter:
-#        type: tosca.capabilities.nfv.Metric
-
-#  tosca.nodes.nfv.CP:
-#    _extensions:
-#      shorthand_name: CP
-#      type_qualified_name: tosca:CP
-#      specification: tosca-simple-nfv-1.0
-#      specification_section: 8.5.3
-#      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd03/tosca-nfv-v1.0-csd03.html#_Toc419290245'
-#    description: >-
-#      The NFV CP node represents a logical connection point entity as defined by [ETSI GS NFV-MAN 001 v1.1.1]. A connection point
-#      may be, for example, a virtual port, a virtual NIC address, a physical port, a physical NIC address or the endpoint of an IP
-#      VPN enabling network connectivity. It is assumed that each type of connection point will be modeled using subtypes of the CP
-#      type.
-#    derived_from: tosca.nodes.network.Port
-#    properties:
-#      type:
-#        description: >-
-#          This may be, for example, a virtual port, a virtual NIC address, a SR-IOV port, a physical port, a physical NIC address
-#          or the endpoint of an IP VPN enabling network connectivity.
-#        type: string
-#      anti_spoofing_protection:
-#        description: >-
-#          Indicates of whether anti-spoofing rule need to be enabled for this vNIC. This is applicable only when CP type is virtual
-#          NIC (vPort).
-#        type: boolean
-#        required: false
-#    attributes:
-#      address:
-#        description: >-
-#          The actual virtual NIC address that is been assigned when instantiating the connection point.
-#        type: string
-#    requirements:
-#      - virtual_link:
-#          capability: tosca.capabilities.nfv.VirtualLinkable
-#          relationship: tosca.relationships.nfv.VirtualLinksTo
-#      - virtual_binding:
-#          capability: tosca.capabilities.nfv.VirtualBindable
-#          relationship: tosca.relationships.nfv.VirtualBindsTo
-
   tosca.nodes.nfv.FP:
     _extensions:
       shorthand_name: FP # ARIA NOTE: the spec must be mistaken here, says "VL"
@@ -252,26 +170,6 @@ node_types:
   #
   # Virtual link
   #
-
-#  tosca.nodes.nfv.VL:
-#    _extensions:
-#      shorthand_name: VL
-#      type_qualified_name: tosca:VL
-#      specification: tosca-simple-nfv-1.0
-#      specification_section: 9.1
-#      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd03/tosca-nfv-v1.0-csd03.html#_Toc419290251'
-#    description: >-
-#      The NFV VL node type represents a logical virtual link entity as defined by [ETSI GS NFV-MAN 001 v1.1.1]. It is the default
-#      type from which all other virtual link types derive.
-#    derived_from: tosca.nodes.network.Network
-#    properties:
-#      vendor:
-#        description: >-
-#          Vendor generating this VLD.
-#        type: string
-#    capabilities:
-#      virtual_linkable:
-#        type: tosca.capabilities.nfv.VirtualLinkable
 
   tosca.nodes.nfv.VL.ELine:
     _extensions:
