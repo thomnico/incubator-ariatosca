@@ -1,4 +1,9 @@
+include CHANGELOG.rst
+include CONTRIBUTING
+include LICENSE
+include NOTICE
+include README.rst
 include requirements.txt
 include VERSION
-include LICENSE
+recursive-include docs *
 recursive-include examples *
