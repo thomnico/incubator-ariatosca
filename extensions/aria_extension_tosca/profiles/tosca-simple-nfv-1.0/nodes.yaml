@@ -321,26 +321,6 @@ node_types:
       # monitoring_parameters:
         # modeled as ad hoc (named) capabilities in node template
 
-  tosca.nodes.nfv.FP:
-    _extensions:
-      shorthand_name: FP # ARIA NOTE: the spec must be mistaken here, says "VL"
-      type_qualified_name: tosca:FP
-      specification: tosca-simple-nfv-1.0
-      specification_section: 10.5.1
-      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd03/tosca-nfv-v1.0-csd03.html#_Toc447714722'
-    description: >-
-      The NFV FP node type represents a logical network forwarding path entity as defined by [ETSI GS NFV-MAN 001 v1.1.1].
-    derived_from: tosca.nodes.Root
-    properties:
-      policy:
-        description: >-
-          A policy or rule to apply to the NFP
-        type: string
-        required: false
-    requirements:
-      - forwarder:
-          capability: tosca.capabilities.nfv.Forwarder
-
   tosca.nodes.nfv.VL.ELine:
     _extensions:
       shorthand_name: VL.ELine # ARIA NOTE: omitted in the spec
