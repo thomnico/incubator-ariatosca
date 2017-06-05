@@ -20,8 +20,8 @@ capability_types:
       shorthand_name: VirtualBindable
       type_qualified_name: tosca:VirtualBindable
       specification: tosca-simple-nfv-1.0
-      specification_section: 8.2.2
-      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd03/tosca-nfv-v1.0-csd03.html#_Toc419290220'
+      specification_section: 5.5.1
+      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd04/tosca-nfv-v1.0-csd04.html#_Toc482896069'
     description: >-
       A node type that includes the VirtualBindable capability indicates that it can be pointed by
       tosca.relationships.nfv.VirtualBindsTo relationship type.
@@ -32,36 +32,12 @@ capability_types:
       shorthand_name: Metric
       type_qualified_name: tosca:Metric
       specification: tosca-simple-nfv-1.0
-      specification_section: 8.2.3
-      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd03/tosca-nfv-v1.0-csd03.html#_Toc418607874'
+      specification_section: 5.5.2
+      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd04/tosca-nfv-v1.0-csd04.html#_Toc482896070'
     description: >-
       A node type that includes the Metric capability indicates that it can be monitored using an nfv.relationships.Monitor
       relationship type.
     derived_from: tosca.capabilities.Endpoint
-
-  tosca.capabilities.nfv.Forwarder:
-    _extensions:
-      shorthand_name: Forwarder
-      type_qualified_name: tosca:Forwarder
-      specification: tosca-simple-nfv-1.0
-      specification_section: 10.3.1
-      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd03/tosca-nfv-v1.0-csd03.html#_Toc447714718'
-    description: >-
-      A node type that includes the Forwarder capability indicates that it can be pointed by tosca.relationships.nfv.FowardsTo
-      relationship type.
-    derived_from: tosca.capabilities.Root
-
-  tosca.capabilities.nfv.VirtualLinkable:
-    _extensions:
-      shorthand_name: VirtualLinkable
-      type_qualified_name: tosca:VirtualLinkable
-      specification: tosca-simple-nfv-1.0
-      specification_section: 11.3.1
-      specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd03/tosca-nfv-v1.0-csd03.html#_Toc447714735'
-    description: >-
-      A node type that includes the VirtualLinkable capability indicates that it can be pointed by
-      tosca.relationships.nfv.VirtualLinksTo relationship type.
-    derived_from: tosca.capabilities.Node
 
   tosca.capabilites.nfv.VirtualCompute:
     _extensions:
