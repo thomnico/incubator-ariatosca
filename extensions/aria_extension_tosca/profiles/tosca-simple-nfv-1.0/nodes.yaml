@@ -43,8 +43,8 @@ node_types:
           VirtualStorageDescriptor from which a VirtualStorage instance is created. If no boot order
           is defined the default boot order defined in the VIM or NFVI shall be used.
         type: list # explicit index (boot index) not necessary, contrary to IFA011
-          entry_schema:
-            type: string
+        entry_schema:
+          type: string
         required: false
       nfvi_constraints:
         description: >-
@@ -62,18 +62,30 @@ node_types:
         entry_schema:
           type: tosca.datatypes.nfv.VnfcConfigurableProperties
         required: true
-    attributes: # ARIA NOTE: The attributes are only described in section [5.9.2.5 Definition], but
-                # are not mentioned in section [5.9.2.2 Attributes].
-                # they are inherited from tosca.nodes.Compute.
+    attributes:
+    # ARIA NOTE: The attributes are only described in section [5.9.2.5 Definition], but are not
+    # mentioned in section [5.9.2.2 Attributes]. They are inherited from tosca.nodes.Compute.
+    # In addition, I added a 'type' field to every one of them, so their TOSCA syntax will be valid.
       private_address:
+        type: string
         status: deprecated
       public_address:
+        type: string
         status: deprecated
       networks:
+        type: map
+        entry_schema:
+          type: tosca.datatypes.network.NetworkInfo
         status: deprecated
       ports:
+        type: map
+        entry_schema:
+          type: tosca.datatypes.network.PortInfo
         status: deprecated
-    capabilites:
+    capabilities:
+      # ARIA NOTE: I commented out the virtual_storage capability as tosca.capabilities.nfv.VirtualStorage
+      # does not exist in csd04. csd04 even states:
+      # "Editor Note: Need to create tosca.capabilities.nfv.VirtualStorage capability type."
       virtual_compute:
         description: Describes virtual compute resources capabilities.
         type: tosca.capabilities.nfv.VirtualCompute
@@ -96,43 +108,66 @@ node_types:
         #  cpu_load: tosca.capabilities.nfv.Metric
         # memory_usage: tosca.capabilities.nfv.Metric
 
+      # ARIA NOTE: The capabilities 'host', 'endpoint', 'os', 'scalable', 'binding' are only
+      # described in section [5.9.2.5 Definition], but are not mentioned in section
+      # [5.9.2.4 Capabilities] they are inherited from tosca.nodes.Compute.
+
       host: #Editor note: FFS. How this capabilities should be used in NFV Profile
         type: tosca.capabilities.Container
         valid_source_types: [tosca.nodes.SoftwareComponent]
-        occurrences: [ 0,UNBOUNDED ]
-      endpoint: # ARIA NOTE: lacks type in contrast with the TOSCA spec
-        occurrences: [ 0,0 ]
-      os: # ARIA NOTE: lacks type in contrast with the TOSCA spec
-        occurrences: [ 0,0 ]
+        occurrences: [ 0, UNBOUNDED ]
+      endpoint:
+      # ARIA NOTE: lacks type in contrast with the TOSCA spec, so I added one.
+      # In addition, I commented out the 'occurrences' field since its value is not valid. I'm
+      # guessing it was just csd04's way of saying that this requirement is deprecated. But I'm not
+      # sure if this is the best way to do it.
+        type: tosca.capabilities.Endpoint.Admin
+      # occurrences: [ 0, 0 ]
+      os:
+      # ARIA NOTE: lacks type in contrast with the TOSCA spec, so I added one.
+      # In addition I commented out the 'occurrences' field since its value is not valid. I'm
+      # guessing it was just csd04's way of saying that this requirement is deprecated. But I'm not
+      # sure if this is the best way to do it.
+        type: tosca.capabilities.OperatingSystem
+      # occurrences: [ 0, 0 ]
       scalable: #Editor note: FFS. How this capabilities should be used in NFV Profile
         type: tosca.capabilities.Scalable
-      binding: # ARIA NOTE: lacks type in contrast with the TOSCA spec
-        occurrences: [0,UNBOUNDED]
-      # ARIA NOTE: The aforementioned two capabilities ('host' and 'scalable') are only described in
-      # section [5.9.2.5 Definition], but are not mentioned in section [5.9.2.4 Capabilities].
-      # they are inherited from tosca.nodes.Compute.
+      binding:
+      # ARIA NOTE: lacks type in contrast with the TOSCA spec, so I added one.
+        type: tosca.capabilities.network.Bindable
+        occurrences: [ 0, UNBOUNDED ]
     requirements:
-      - virtual_storage:
-          capability: tosca.capabilities.nfv.VirtualStorage
-          # ARIA NOTE: the above capability type does not exist in csd04...
-          relationship: tosca.relationships.nfv.VDU.AttachedTo
-          # ARIA NOTE: the above relationship type does not exist in csd04...
-          node: tosca.nodes.nfv.VDU.VirtualStorage
-          occurences: [ 0, UNBOUNDED ]
+      # ARIA NOTE: I commented out the virtual_storage requirement as both
+      # tosca.capabilities.nfv.VirtualStorage and tosca.relationships.nfv.VDU.AttachedTo
+      # do not exist in csd04.
+#     - virtual_storage:
+#         capability: tosca.capabilities.nfv.VirtualStorage
+#         relationship: tosca.relationships.nfv.VDU.AttachedTo
+#         node: tosca.nodes.nfv.VDU.VirtualStorage
+#         occurrences: [ 0, UNBOUNDED ]
       - local_storage: #For NFV Profile, this requirement is deprecated.
-          occurrences: [0,0]
-        # ARIA NOTE: what to do with this capability?
+          # ARIA NOTE: I added 'capability', 'node' and 'relationship' fields to to this requirement
+          # to make it valid TOSCA, even though it is 'deprecated' according to csd04.
+          # In Addition, I commented out the 'occurrences' field since its value is not valid. I'm
+          # guessing it was just csd04's way of saying that this requirement is deprecated. But I'm
+          # not sure if this is the best way to do it.
+          capability: tosca.capabilities.Attachment
+          node: tosca.nodes.BlockStorage
+          relationship: tosca.relationships.AttachesTo
+        # occurrences: [ 0,0 ]
     artifacts:
-      - sw_image:
-          description: >-
-            Describes the software image which is directly loaded on the virtualization container
-            realizing this virtual storage.
-          file: # ARIA NOTE: missing value even though it is required in TOSCA
-          type: tosca.artifacts.nfv.SwImage
-        # ARIA NOTE: this description is exactly the same as the description of the artifact of the
-        # same name of tosca.nodes.nfv.VDU.VirtualStorage. While the description seems fitting there
-        # here it seems it should mention something in the lines of "realizing this compute node",
-        # and not "realizing this virtual storage"
+    # ARIA NOTE: in csd04 the artifacts are described as a list, but in TOSCA they are defined as a
+    # map
+      sw_image:
+        description: >-
+          Describes the software image which is directly loaded on the virtualization container
+          realizing this virtual storage.
+        file: # ARIA NOTE: missing value even though it is required in TOSCA
+        type: tosca.artifacts.nfv.SwImage
+      # ARIA NOTE: this description is exactly the same as the description of the artifact of the
+      # same name of tosca.nodes.nfv.VDU.VirtualStorage. While the description seems fitting there
+      # here it seems it should mention something in the lines of "realizing this compute node",
+      # and not "realizing this virtual storage"
 
   tosca.nodes.nfv.VDU.VirtualStorage:
     _extensions:
@@ -150,40 +185,45 @@ node_types:
       deployment and operational behavior of a virtual storage resources, as defined by
       [ETSI NFV IFA011].
     derived_from: tosca.nodes.Root
-      properties:
-        # ARIA NOTE: the "id" property is already commented out in the spec, and is copied here
-        # verbatim from section [5.9.3.5 Definition]. In section [5.9.3.1 Properties], this property
-        # does not have a type and a required values, but does have a description
-        #id:
-          # node name
-        type_of_storage:
-          description: Type of virtualized storage resource
-          type: string
-          required: true
-        size_of_storage:
-          description: Size of virtualized storage resource (in GB)
-          # ARIA NOTE: if the description states that the property assignment should be in GB, why
-          # does the type is 'scalar-unit.size' and not just integer? In addition, why does section
-          # [5.9.3.1 Properties] states in the constraints column of this attribute that the value
-          # should be a number?
-          type: scalar-unit.size
-          required: true
-        rdma_enabled:
-          description: Indicate if the storage support RDMA
-          type: boolean
-          required: false
-        capabilities:
-          virtual_storage:
-            type: tosca.capabilities.nfv.VirtualStorage
-          # ARIA NOTE: the above capability type does not exist in csd04. csd04 even states:
-          # "Editor Note: Need to create tosca.capabilities.nfv.VirtualStorage capability type."
-        artifacts:
-          - sw_image:
-              description: >-
-                Describes the software image which is directly loaded on the virtualization
-                container realizing this virtual storage.
-              file: # ARIA NOTE: missing value even though it is required in TOSCA
-              type: tosca.artifacts.nfv.SwImage
+    properties:
+      # ARIA NOTE: the "id" property is already commented out in the spec, and is copied here
+      # verbatim from section [5.9.3.5 Definition]. In section [5.9.3.1 Properties], this property
+      # does not have a type and a required values, but does have a description
+      #id:
+        # node name
+      type_of_storage:
+        description: Type of virtualized storage resource
+        type: string
+        required: true
+      size_of_storage:
+        description: Size of virtualized storage resource (in GB)
+        # ARIA NOTE: if the description states that the property assignment should be in GB, why
+        # does the type is 'scalar-unit.size' and not just integer? In addition, why does section
+        # [5.9.3.1 Properties] states in the constraints column of this attribute that the value
+        # should be a number?
+        type: scalar-unit.size
+        required: true
+      rdma_enabled:
+        description: Indicate if the storage support RDMA
+        type: boolean
+        required: false
+#    capabilities:
+#       ARIA NOTE: I commented out the virtual_storage capability as tosca.capabilities.nfv.VirtualStorage
+#       does not exist in csd04. csd04 even states:
+#       "Editor Note: Need to create tosca.capabilities.nfv.VirtualStorage capability type."
+#       Since it is the only capability, I actually needed to comment out the whole 'capabilities'
+#       section.
+#      virtual_storage:
+#        type: tosca.capabilities.nfv.VirtualStorage
+    artifacts:
+    # ARIA NOTE: in csd04 the artifacts are described as a list, but in TOSCA they are defined as a
+    # map
+      sw_image:
+        description: >-
+          Describes the software image which is directly loaded on the virtualization
+          container realizing this virtual storage.
+        file: # ARIA NOTE: missing value even though it is required in TOSCA
+        type: tosca.artifacts.nfv.SwImage
 
   tosca.nodes.nfv.Cpd:
     _extensions:
@@ -192,11 +232,10 @@ node_types:
       specification: tosca-simple-nfv-1.0
       specification_section: 5.9.4
       specification_url: 'http://docs.oasis-open.org/tosca/tosca-nfv/v1.0/csd04/tosca-nfv-v1.0-csd04.html#_Toc482896081'
-    derived_from: tosca.nodes.Root
     description: >-
       The TOSCA nfv.Cpd node represents network connectivity to a compute resource or a VL as defined
       by [ETSI GS NFV-IFA 011]. This is an abstract type used as parent for the various Cpd types.
-
+    derived_from: tosca.nodes.Root
     properties:
       layer_protocol:
         description: Identifies which protocol the connection point uses for connectivity purposes
@@ -225,7 +264,7 @@ node_types:
           from this Connection Point Descriptor.
         type: list
         entry_schema:
-          type: tosca.datatype.nfv.AddressData
+          type: tosca.datatypes.nfv.AddressData
         required: false
 
   tosca.nodes.nfv.VduCpd:
@@ -254,13 +293,15 @@ node_types:
           type: VirtualNetworkInterfaceRequirements
         required: false
     requirements:
-      - virtual_link:
-          description: Describes the requirements for linking to virtual link
-          capability: tosca.capabilities.nfv.VirtualLinkable
-          relationship: tosca.relationships.nfv.VirtualLinksTo
-          node: tosca.nodes.nfv.VnfVirtualLinkDesc
+     # ARIA NOTE: the capability type and the relationship type of this capability were part of the
+     # NSD profile (section 11 in csd03), and were removed in csd04. It seems that they forgot to
+     # edit some places who reference it. so I'm commenting out this requirement.
+     # - virtual_link:
+     #     description: Describes the requirements for linking to virtual link
+     #     capability: tosca.capabilities.nfv.VirtualLinkable
+     #     relationship: tosca.relationships.nfv.VirtualLinksTo
+     #     node: tosca.nodes.nfv.VnfVirtualLinkDesc
       - virtual_binding:
-          description: Describe the requirement for binding with VDU
           capability: tosca.capabilities.nfv.VirtualBindable
           relationship: tosca.relationships.nfv.VirtualBindsTo
           node: tosca.nodes.nfv.VDU.Compute
@@ -306,9 +347,12 @@ node_types:
      #    entry_schema:
      #      type: tosca.datatypes.nfv.VlFlavour
      #   required: true
-    capabilities:
-      virtual_linkable:
-       type: tosca.capabilities.nfv.VirtualLinkable
+  # capabilities:
+    # virtual_linkable:
+       # ARIA NOTE this capability type was part of the NSD profile (section 11 in csd03), and was
+       # removed in csd04. It seems that they forgot to edit some places who reference it. so I'm
+       # commenting out this whole section.
+       # type: tosca.capabilities.nfv.VirtualLinkable
 
       # ARIA NOTE: the "monitoring_parameters" capability is already commented out in the spec, and
       # is copied here verbatim from section [5.9.6.5 Definition].

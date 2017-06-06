@@ -39,7 +39,7 @@ capability_types:
       relationship type.
     derived_from: tosca.capabilities.Endpoint
 
-  tosca.capabilites.nfv.VirtualCompute:
+  tosca.capabilities.nfv.VirtualCompute:
     _extensions:
       shorthand_name: VirtualCompute
       type_qualified_name: tosca:VirtualCompute
